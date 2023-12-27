@@ -105,7 +105,8 @@ class NetflixLocationUpdate:
             if button is not None:
                 button.click()
                 return True
-        except:
+        except Exception as e:
+            logging.error(e)
             pass
 
         return False
