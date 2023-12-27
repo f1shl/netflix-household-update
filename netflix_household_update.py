@@ -4,6 +4,7 @@ import time
 import logging
 import configparser
 from selenium import webdriver
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from chromedriver_py import binary_path
 
@@ -87,14 +88,26 @@ class NetflixLocationUpdate:
         logging.info('---------------- Script shutdown ----------------\n')
 
     def __parse_html_for_button(self, update_link):
-        self._driver.get(update_link)
-        buttons = self._driver.find_elements(By.TAG_NAME, 'button')
-        # Just press all buttons, found in the HTML page. This is done to ensure, that the correct button got pressed
-        for button in buttons:
-            text = button.get_attribute(BUTTON_SEARCH_ATTR_NAME)
-            if text == BUTTON_SEARCH_ATTR_VALUE:
+        try:
+            self._driver.get(update_link)
+            time.sleep(1)
+            email_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="userLoginId"]')
+            password_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="password"]')
+            email_field.send_keys(self._config.get('NETFLIX', 'Username'))
+            password_field.send_keys(self._config.get('NETFLIX', 'Password'))
+            login_button = self._driver.find_element(By.CSS_SELECTOR, 'button[data-uia=login-submit-button]')
+            login_button.send_keys(Keys.RETURN)
+            time.sleep(1)
+
+            # Find the confirmation button after login
+            button = self._driver.find_element(By.CSS_SELECTOR, f'button[{BUTTON_SEARCH_ATTR_NAME}={BUTTON_SEARCH_ATTR_VALUE}]')
+            # Just press all buttons, found in the HTML page. This is done to ensure, that the correct button got pressed
+            if button is not None:
                 button.click()
                 return True
+        except:
+            pass
+
         return False
 
     def fetch_mails(self):

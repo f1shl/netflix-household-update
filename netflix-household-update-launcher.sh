@@ -1,2 +1,2 @@
-cd /home/pi/netflix-location-update
-/home/pi/netflix-location-update/.venv/bin/python netflix_location_update.py
+cd /home/pi/netflix-household-update
+/home/pi/netflix-household-update/.venv/bin/python netflix_household_update.py
