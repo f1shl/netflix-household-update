@@ -1,4 +1,4 @@
-# Netflix Location Updater
+# Netflix Household Updater
 
 *Netflix Location Updater* is an easy to use python script to automatically fetch the location update 
 Email from an Email mailbox and click the confirmation link in it.
