@@ -37,7 +37,7 @@ Make sure to fill out the config.ini file with the correct parameters for the Em
 
 To run the script, simply execute the following command:
 
-    python netflix_location_update.py
+    python netflix_household_update.py
 
 The script will run in an infinite loop and polls the Email mailbox with the default polling time of 2 seconds.
 The script can be aborted by pressing **Ctrl+C**
@@ -49,8 +49,8 @@ For the following commands, it is assumed that the default user *pi* exists. If 
 The easiest way ist to use SSH connection and execute the following commands:
 
     cd /home/pi
-    git clone https://github.com/f1shl/netflix-location-update.git
-    cd netflix-location-update
+    git clone https://github.com/f1shl/netflix-household-update.git
+    cd netflix-household-update
     python -m venv .venv
     .venv/bin/pip install -r requirements.txt
 
@@ -64,7 +64,7 @@ Edit crontab:
 
 Select nano as editor. Go to the end of the file and add the following line:
 
-    @reboot /home/pi/netflix-location-update/netflix-location-update-launcher.sh &
+    @reboot /home/pi/netflix-household-update/netflix-household-update-launcher.sh &
 
 Save with **CTRL+X**, **Y** and finally press **Return**
 Now restart the Raspberry Pi:
