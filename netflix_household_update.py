@@ -87,10 +87,8 @@ class NetflixLocationUpdate:
             self._mail.logout()
         logging.info('---------------- Script shutdown ----------------\n')
 
-    def __parse_html_for_button(self, update_link):
+    def __netflix_login(self):
         try:
-            self._driver.get(update_link)
-            time.sleep(1)
             email_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="userLoginId"]')
             password_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="password"]')
             email_field.send_keys(self._config.get('NETFLIX', 'Username'))
@@ -98,7 +96,23 @@ class NetflixLocationUpdate:
             login_button = self._driver.find_element(By.CSS_SELECTOR, 'button[data-uia=login-submit-button]')
             login_button.send_keys(Keys.RETURN)
             time.sleep(1)
+            return True
+        except Exception as e:
+            logging.error(e)
+            return False
 
+    def __parse_html_for_button(self, update_link):
+        self._driver.get(update_link)
+        time.sleep(1)
+        try:
+            email_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="userLoginId"]')
+            logging.info('Currently not logged in. Try to login to Netflix account')
+            self.__netflix_login()
+        except Exception as e:
+            logging.info('Already logged in.')
+            pass
+
+        try:
             # Find the confirmation button after login
             button = self._driver.find_element(By.CSS_SELECTOR, f'button[{BUTTON_SEARCH_ATTR_NAME}={BUTTON_SEARCH_ATTR_VALUE}]')
             # Just press all buttons, found in the HTML page. This is done to ensure, that the correct button got pressed
