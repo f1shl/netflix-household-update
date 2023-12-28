@@ -163,6 +163,7 @@ class NetflixLocationUpdate:
                 for f in parsed_email.get_payload():
                     if f.get_content_type() == "text/html":
                         html_payload = f.as_string()
+                html_payload = html_payload.replace('=3D', '=').replace('&amp;', '&').replace('=\n', '')
 
                 idx_start = -1
                 for s in NETFLIX_LINK_START:
