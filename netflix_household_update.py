@@ -202,14 +202,17 @@ class NetflixScheduler:
         self._location_update = location_update
 
     def run(self):
-        try:
-            while True:
+        while True:
+            try:
                 self._location_update.fetch_mails()
                 time.sleep(self._polling_time)
-        except KeyboardInterrupt:
-            pass
-        finally:
-            self._location_update.close()
+            except KeyboardInterrupt:
+                logging.info("Break script by keyboard interrupt")
+                break
+            except Exception as e:
+                logging.error(e)
+
+        self._location_update.close()
 
 
 if __name__ == '__main__':
