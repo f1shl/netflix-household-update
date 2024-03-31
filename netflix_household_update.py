@@ -2,7 +2,7 @@ import imaplib
 import email
 import time
 import logging
-import configparser
+import os
 from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
@@ -18,7 +18,6 @@ BUTTON_SEARCH_ATTR_VALUE = 'set-primary-location-action'
 
 
 class NetflixLocationUpdate:
-    _config: configparser.ConfigParser
     _driver: webdriver.Chrome
     _mail: imaplib.IMAP4_SSL
     _mailbox_name: str              # Mailbox name for incoming Emails (normally INBOX)
@@ -26,20 +25,15 @@ class NetflixLocationUpdate:
     _move_to_mailbox_name: str      # Mailbox Name where the Netflix Emails shall be moved
 
     def __init__(self, config_path: str):
-        self._config = configparser.ConfigParser()
-        self._config.read(config_path)
-        if 'EMAIL' not in self._config:
-            raise ValueError(f'EMAIL section does not exist in {config_path} file.')
-
-        self._mailbox_name = self._config.get('EMAIL', 'Mailbox', fallback='INBOX')
-        self._move_to_mailbox = self._config.get('GENERAL', 'MoveEmailsToMailbox', fallback=False)
-        self._move_to_mailbox_name = self._config.get('GENERAL', 'MailboxName', fallback='Netflix')
+        self._mailbox_name =  os.environ.get('MAILBOX_NAME', 'INBOX')
+        self._move_to_mailbox =  os.environ.get('MoveEmailsToMailbox', True)
+        self._move_to_mailbox_name = os.environ.get('MoveToMailboxName', 'Netflix')
 
         # Email config
-        imap_server = self._config.get('EMAIL', 'ImapServer')
-        imap_port = self._config.getint('EMAIL', 'ImapPort')
-        imap_username = self._config.get('EMAIL', 'Username')
-        imap_password = self._config.get('EMAIL', 'Password')
+        imap_server =  os.environ.get('IMAP_SERVER', '')
+        imap_port =  os.environ.get('IMAP_PORT', 993)
+        imap_username = os.environ.get('IMAP_USER', '')
+        imap_password =  os.environ.get('IMAP_PASS', '')
 
         # Logging config
         logging.basicConfig(encoding='utf8', level=logging.INFO,
@@ -87,8 +81,8 @@ class NetflixLocationUpdate:
         try:
             email_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="userLoginId"]')
             password_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="password"]')
-            email_field.send_keys(self._config.get('NETFLIX', 'Username'))
-            password_field.send_keys(self._config.get('NETFLIX', 'Password'))
+            email_field.send_keys(os.environ.get('NETFLIX_USER', ''))
+            password_field.send_keys(os.environ.get('NETFLIX_PASS', ''))
             login_button = self._driver.find_element(By.CSS_SELECTOR, 'button[data-uia=login-submit-button]')
             login_button.send_keys(Keys.RETURN)
             time.sleep(1)
@@ -212,6 +206,6 @@ class NetflixScheduler:
 
 
 if __name__ == '__main__':
-    netflix_updater = NetflixLocationUpdate(config_path='config.ini')
+    netflix_updater = NetflixLocationUpdate()
     scheduler = NetflixScheduler(polling_time=2, location_update=netflix_updater)
     scheduler.run()
