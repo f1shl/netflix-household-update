@@ -13,4 +13,4 @@ RUN python3 -m pip install -r requirements.txt
 COPY config.ini /app
 COPY netflix_household_update.py /app
 
-CMD ["python3", "netflix_household_update.py"]
+ENTRYPOINT ["python3", "netflix_household_update.py"]
