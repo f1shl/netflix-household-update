@@ -2,7 +2,7 @@
 
 *Netflix Location Updater* is an easy to use python script to automatically fetch the location update 
 Email from an Email mailbox and click the confirmation link in it.
-Script can easily run on a Raspberry Pi.
+Script can easily run on a Raspberry Pi. There is also support to run it on Docker.
 
 ## Features
 
