@@ -2,11 +2,11 @@ import imaplib
 import email
 import time
 import logging
-import configparser
+import os, sys
 from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
-from chromedriver_py import binary_path
+
 
 # Constants
 # Used as search criteria for netflix mail and button to click. Could be changed by Netflix in the future
@@ -17,42 +17,38 @@ BUTTON_SEARCH_ATTR_VALUE = 'set-primary-location-action'
 
 
 class NetflixLocationUpdate:
-    _config: configparser.ConfigParser
     _driver: webdriver.Chrome
     _mail: imaplib.IMAP4_SSL
     _mailbox_name: str              # Mailbox name for incoming Emails (normally INBOX)
     _move_to_mailbox: str           # If true, Netflix Emails will be moved into another mailbox
     _move_to_mailbox_name: str      # Mailbox Name where the Netflix Emails shall be moved
 
-    def __init__(self, config_path: str):
-        self._config = configparser.ConfigParser()
-        self._config.read(config_path)
-        if 'EMAIL' not in self._config:
-            raise ValueError(f'EMAIL section does not exist in {config_path} file.')
-
-        self._mailbox_name = self._config.get('EMAIL', 'Mailbox', fallback='INBOX')
-        self._move_to_mailbox = self._config.get('GENERAL', 'MoveEmailsToMailbox', fallback=False)
-        self._move_to_mailbox_name = self._config.get('GENERAL', 'MailboxName', fallback='Netflix')
+    def __init__(self):
+        self._mailbox_name =  os.environ.get('MAILBOX_NAME', 'INBOX')
+        self._move_to_mailbox =  os.environ.get('MoveEmailsToMailbox', True)
+        self._move_to_mailbox_name = os.environ.get('MoveToMailboxName', 'Netflix')
 
         # Email config
-        imap_server = self._config.get('EMAIL', 'ImapServer')
-        imap_port = self._config.getint('EMAIL', 'ImapPort')
-        imap_username = self._config.get('EMAIL', 'Username')
-        imap_password = self._config.get('EMAIL', 'Password')
-
-        # Chromedriver config
-        use_chromedriver_py = self._config.getboolean('CHROMEDRIVER', 'UseChromedriverPy', fallback=True)
-        chromedriver_path = binary_path
-        if use_chromedriver_py is False:
-            chromedriver_path = self._config.get('CHROMEDRIVER', 'ExecutablePath')
+        imap_server =  os.environ.get('IMAP_SERVER', '')
+        imap_port =  os.environ.get('IMAP_PORT', 993)
+        imap_username = os.environ.get('IMAP_USER', '')
+        imap_password =  os.environ.get('IMAP_PASS', '')
+        
+        # Netflix config
+        self.netflix_user = os.environ.get('NETFLIX_USER', '')
+        self.netflix_pass = os.environ.get('NETFLIX_PASS', '')
 
         # Logging config
-        logging.basicConfig(filename='status.log', encoding='utf8', level=logging.INFO,
+        logging.basicConfig(encoding='utf8', level=logging.INFO,
                             format='%(asctime)s %(levelname)-8s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
         logging.info('---------------- Script started ----------------\n')
 
-        self._driver = self.__init_webdriver(chromedriver_path)
+        if '' in [imap_server, imap_username, imap_password, self.netflix_user, self.netflix_pass]:
+            required_env_vars = ['IMAP_SERVER', 'IMAP_USER', 'IMAP_PASS', 'NETFLIX_USER', 'NETFLIX_PASS']
+            raise Exception(f"Required arguments not provided in environment variables! Please add the following: {required_env_vars}")
+
+        self._driver = self.__init_webdriver()
         self._mail = self.__init_mails(imap_server, imap_port, imap_username, imap_password)
 
         # Create the Netflix folder in the mail account
@@ -63,11 +59,12 @@ class NetflixLocationUpdate:
         self.close()
 
     @staticmethod
-    def __init_webdriver(chromedriver_path: str) -> webdriver.Chrome:
-        svc = webdriver.ChromeService(executable_path=chromedriver_path)
+    def __init_webdriver() -> webdriver.Chrome:
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("headless")
-        driver = webdriver.Chrome(options=chrome_options, service=svc)
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-gpu")
+        driver = webdriver.Chrome(options=chrome_options)
         return driver
 
     @staticmethod
@@ -91,8 +88,8 @@ class NetflixLocationUpdate:
         try:
             email_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="userLoginId"]')
             password_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="password"]')
-            email_field.send_keys(self._config.get('NETFLIX', 'Username'))
-            password_field.send_keys(self._config.get('NETFLIX', 'Password'))
+            email_field.send_keys(self.netflix_user)
+            password_field.send_keys(self.netflix_pass)
             login_button = self._driver.find_element(By.CSS_SELECTOR, 'button[data-uia=login-submit-button]')
             login_button.send_keys(Keys.RETURN)
             time.sleep(1)
@@ -216,6 +213,8 @@ class NetflixScheduler:
 
 
 if __name__ == '__main__':
-    netflix_updater = NetflixLocationUpdate(config_path='config.ini')
-    scheduler = NetflixScheduler(polling_time=2, location_update=netflix_updater)
+    polling_time = os.environ.get('POLLING_TIME_IN_SECONDS', 2)
+    
+    netflix_updater = NetflixLocationUpdate()
+    scheduler = NetflixScheduler(polling_time=polling_time, location_update=netflix_updater)
     scheduler.run()
