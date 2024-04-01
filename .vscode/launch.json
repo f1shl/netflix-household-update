@@ -8,7 +8,7 @@
             "name": "Python Debugger: Run Netflix Updater",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "program": "netflix_household_update.py",
             "console": "integratedTerminal",
             "env": {
                 "IMAP_SERVER": "",
