@@ -88,3 +88,20 @@ docker run --name [docker-container-name] \
             -e NETFLIX_USER=[netflix-username] \
             -e NETFLIX_PASS=[netflix-passsword] \
             [docker-image-name]:latest
+
+Or run in with Docker-Compose:
+```
+version: '3.8'
+
+services:
+    netflix-updater:
+      container_name: netflix-updater
+      image: [docker-image-name]:latest
+      restart: unless-stopped
+      environment:
+        - IMAP_SERVER=[imap-server]
+        - IMAP_USER=[imap-user]
+        - IMAP_PASS=[imap-password]
+        - NETFLIX_USER=[netflix-username]
+        - NETFLIX_PASS=[netflix-passsword]
+```
