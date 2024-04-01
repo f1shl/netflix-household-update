@@ -12,7 +12,6 @@
             "console": "integratedTerminal",
             "env": {
                 "IMAP_SERVER": "",
-                "IMAP_PORT": "",
                 "IMAP_USER": "",
                 "IMAP_PASS": "",
                 "NETFLIX_USER": "",

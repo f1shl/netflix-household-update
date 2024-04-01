@@ -213,6 +213,8 @@ class NetflixScheduler:
 
 
 if __name__ == '__main__':
+    polling_time = os.environ.get('POLLING_TIME_IN_SECONDS', 2)
+    
     netflix_updater = NetflixLocationUpdate()
-    scheduler = NetflixScheduler(polling_time=2, location_update=netflix_updater)
+    scheduler = NetflixScheduler(polling_time=polling_time, location_update=netflix_updater)
     scheduler.run()
