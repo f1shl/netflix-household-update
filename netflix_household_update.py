@@ -2,7 +2,7 @@ import imaplib
 import email
 import time
 import logging
-import os
+import os, sys
 from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
@@ -23,7 +23,7 @@ class NetflixLocationUpdate:
     _move_to_mailbox: str           # If true, Netflix Emails will be moved into another mailbox
     _move_to_mailbox_name: str      # Mailbox Name where the Netflix Emails shall be moved
 
-    def __init__(self, config_path: str):
+    def __init__(self):
         self._mailbox_name =  os.environ.get('MAILBOX_NAME', 'INBOX')
         self._move_to_mailbox =  os.environ.get('MoveEmailsToMailbox', True)
         self._move_to_mailbox_name = os.environ.get('MoveToMailboxName', 'Netflix')
@@ -33,12 +33,20 @@ class NetflixLocationUpdate:
         imap_port =  os.environ.get('IMAP_PORT', 993)
         imap_username = os.environ.get('IMAP_USER', '')
         imap_password =  os.environ.get('IMAP_PASS', '')
+        
+        # Netflix config
+        self.netflix_user = os.environ.get('NETFLIX_USER', '')
+        self.netflix_pass = os.environ.get('NETFLIX_PASS', '')
 
         # Logging config
         logging.basicConfig(encoding='utf8', level=logging.INFO,
                             format='%(asctime)s %(levelname)-8s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
         logging.info('---------------- Script started ----------------\n')
+
+        if '' in [imap_server, imap_username, imap_password, self.netflix_user, self.netflix_pass]:
+            required_env_vars = ['IMAP_SERVER', 'IMAP_USER', 'IMAP_PASS', 'NETFLIX_USER', 'NETFLIX_PASS']
+            raise Exception(f"Required arguments not provided in environment variables! Please add the following: {required_env_vars}")
 
         self._driver = self.__init_webdriver()
         self._mail = self.__init_mails(imap_server, imap_port, imap_username, imap_password)
@@ -80,8 +88,8 @@ class NetflixLocationUpdate:
         try:
             email_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="userLoginId"]')
             password_field = self._driver.find_element(By.CSS_SELECTOR, 'input[name="password"]')
-            email_field.send_keys(os.environ.get('NETFLIX_USER', ''))
-            password_field.send_keys(os.environ.get('NETFLIX_PASS', ''))
+            email_field.send_keys(self.netflix_user)
+            password_field.send_keys(self.netflix_pass)
             login_button = self._driver.find_element(By.CSS_SELECTOR, 'button[data-uia=login-submit-button]')
             login_button.send_keys(Keys.RETURN)
             time.sleep(1)
