@@ -212,8 +212,8 @@ class NetflixScheduler:
                 break
             except Exception as e:
                 logging.critical(e, exc_info=True)
-            finally:
-                self._location_update.close()
+        
+        self._location_update.close()
 
 
 if __name__ == '__main__':
