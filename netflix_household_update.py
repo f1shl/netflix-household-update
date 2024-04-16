@@ -95,7 +95,7 @@ class NetflixLocationUpdate:
             time.sleep(1)
             return True
         except Exception as e:
-            logging.error(e)
+            logging.error(e, exc_info=True)
             return False
 
     def __parse_html_for_button(self, update_link):
@@ -117,7 +117,7 @@ class NetflixLocationUpdate:
                 button.click()
                 return True
         except Exception as e:
-            logging.error(e)
+            logging.error(e, exc_info=True)
             pass
 
         return False
@@ -129,6 +129,10 @@ class NetflixLocationUpdate:
         # Search for unread emails from the specified sender
         search_criteria = f'(UNSEEN FROM "Netflix")'
         result, data = self._mail.search(None, search_criteria)
+
+        if result != "OK":
+            logging.error("Failed to fetch emails, skipping...")
+            pass
 
         # Get the list of email IDs
         email_ids = data[0].split()
@@ -207,9 +211,9 @@ class NetflixScheduler:
                 logging.info("Break script by keyboard interrupt")
                 break
             except Exception as e:
-                logging.error(e)
-
-        self._location_update.close()
+                logging.critical(e, exc_info=True)
+            finally:
+                self._location_update.close()
 
 
 if __name__ == '__main__':
