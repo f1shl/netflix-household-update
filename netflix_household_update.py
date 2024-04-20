@@ -137,9 +137,11 @@ class NetflixLocationUpdate:
         # Get the list of email IDs
         email_ids = data[0].split()
 
+        if not email_ids:
+            logging.info("No relevant emails found...")
         # List to store extracted href attributes
         href_list = []
-
+        
         # Iterate over the email IDs in reverse order (newest to oldest)
         for email_id in reversed(email_ids):
             logging.info(f"Found Netflix Email, ID: {email_id}")
@@ -220,5 +222,5 @@ if __name__ == '__main__':
     polling_time = os.environ.get('POLLING_TIME_IN_SECONDS', 2)
     
     netflix_updater = NetflixLocationUpdate()
-    scheduler = NetflixScheduler(polling_time=polling_time, location_update=netflix_updater)
+    scheduler = NetflixScheduler(polling_time=int(polling_time), location_update=netflix_updater)
     scheduler.run()
