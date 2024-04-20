@@ -124,6 +124,7 @@ class NetflixLocationUpdate:
 
     def fetch_mails(self):
         # Select the mailbox you want to fetch emails from
+        logging.info("Will fetch emails...")
         self._mail.select(self._mailbox_name)
 
         # Search for unread emails from the specified sender
@@ -215,6 +216,7 @@ class NetflixScheduler:
             except Exception as e:
                 logging.critical(e, exc_info=True)
         
+        logging.warn("Closing location updater!")
         self._location_update.close()
 
 
