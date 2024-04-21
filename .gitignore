@@ -1,4 +1,5 @@
 /.idea
 *.log
+.DS_STORE
 /env
 /.venv
