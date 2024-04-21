@@ -123,20 +123,32 @@ class NetflixLocationUpdate:
         return False
 
     def fetch_mails(self):
-        # Select the mailbox you want to fetch emails from
-        logging.info("Will fetch emails...")
-        self._mail.select(self._mailbox_name)
+        
+        try:
+            # Select the mailbox you want to fetch emails from
+            logging.info("Will fetch emails...")
+            self._mail.select(self._mailbox_name)
 
-        # Search for unread emails from the specified sender
-        search_criteria = f'(UNSEEN FROM "Netflix")'
-        result, data = self._mail.search(None, search_criteria)
+            # Search for unread emails from the specified sender
+            search_criteria = f'(UNSEEN FROM "Netflix")'
+            result, data = self._mail.search(None, search_criteria)
 
-        if result != "OK":
-            logging.error("Failed to fetch emails, skipping...")
-            pass
+            if result != "OK":
+                logging.error("Failed to fetch emails, skipping...")
+                pass
 
-        # Get the list of email IDs
-        email_ids = data[0].split()
+            # Get the list of email IDs
+            email_ids = data[0].split()
+
+        except imaplib.IMAP4.abort:
+            #TODO: Refactor
+            logging.warning("Session expired, trying to login again")
+            imap_server =  os.environ.get('IMAP_SERVER', '')
+            imap_port =  os.environ.get('IMAP_PORT', 993)
+            imap_username = os.environ.get('IMAP_USER', '')
+            imap_password =  os.environ.get('IMAP_PASS', '')
+            self._mail = self.__init_mails(imap_server, imap_port, imap_username, imap_password)
+            return
 
         if not email_ids:
             logging.info("No relevant emails found...")
