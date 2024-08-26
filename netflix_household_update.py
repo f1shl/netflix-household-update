@@ -6,7 +6,6 @@ import configparser
 from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
-from chromedriver_py import binary_path
 
 # Constants
 # Used as search criteria for netflix mail and button to click. Could be changed by Netflix in the future
@@ -41,10 +40,13 @@ class NetflixLocationUpdate:
         imap_password = self._config.get('EMAIL', 'Password')
 
         # Chromedriver config
-        use_chromedriver_py = self._config.getboolean('CHROMEDRIVER', 'UseChromedriverPy', fallback=True)
-        chromedriver_path = binary_path
-        if use_chromedriver_py is False:
+        use_chromedriver_py = self._config.getboolean('CHROMEDRIVER', 'UseChromedriverPy',>
+        if use_chromedriver_py:
+            from chromedriver_py import binary_path
+            chromedriver_path = binary_path
+        else:
             chromedriver_path = self._config.get('CHROMEDRIVER', 'ExecutablePath')
+
 
         # Logging config
         logging.basicConfig(filename='status.log', encoding='utf8', level=logging.INFO,
