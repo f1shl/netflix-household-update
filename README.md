@@ -1,5 +1,9 @@
 # Netflix Household Updater
 
+:warning: **Not maintained anymore!**: I don't maintain this script anymore, as a way easier solution for me was to just share the Email account accross all account members.
+
+<br>
+
 *Netflix Location Updater* is an easy to use python script to automatically fetch the location update 
 Email from an Email mailbox and click the confirmation link in it.
 Script can easily run on a Raspberry Pi.
